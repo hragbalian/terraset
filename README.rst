@@ -1,10 +1,10 @@
-#Terraset
+Terraset
+========
 
 
 
 
-
-### Usage
+Usage
 --------
 
 Terraset will manage your superset charts and dashboard (future: other Superset
@@ -15,7 +15,7 @@ named `charts` and `dashboards`.  You can put these folders anywhere (e.g. a /tm
 but typically you will want to use terraset as part of a CI deployment so these folders
 will be in a repository.
 
-### Configuration
+Configuration
 -------------
 
 To work, Terraset must connect to a running Superset instance, running either
@@ -26,16 +26,16 @@ for each item: `TERRASET_HOST` for host, `TERRASET_USERNAME` for username, and
 `TERRASET_PASSWORD` for password.  If set in a terraset.profile file, the file should
 be structure as as such:
 
-`{.txt}
+```{}
 host=<my-host>
 username=<my-username>
 password=<my-password>
-`
+```
 
 For the most flexibility, the user connecting to Superset should
 have Admin privileges.
 
-### Terraset API
+Terraset API
 ------------
 
 There are six actions that are part of the Terraset api.
@@ -50,7 +50,7 @@ the updates that will be made upon an `update` call
 remote to local settings (both adding and deleting).
 6. Terraset Get: Get's remote settings and overwrites local settings
 
-### Gotchas
+Gotchas
 -------
 * Chart and dashboard folder names need to be unique
 * Chart and dashboard folder names should correspond to the corresponding name
@@ -59,7 +59,7 @@ of the yml file housing its settings
 settings use the `.get()` before `.update()`, otherwise you will overwrite your remote
 charts with now outdated local settings.
 
-### Credits
+Credits
 -------
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
