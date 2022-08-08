@@ -26,7 +26,7 @@ for each item: `TERRASET_HOST` for host, `TERRASET_USERNAME` for username, and
 `TERRASET_PASSWORD` for password.  If set in a terraset.profile file, the file should
 be structure as as such:
 
-``` {.txt}
+``` { .txt}
 host=<my-host>
 username=<my-username>
 password=<my-password>
