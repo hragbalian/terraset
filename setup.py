@@ -14,6 +14,8 @@ requirements = ['Click>=7.0', ]
 
 test_requirements = ['pytest>=3', ]
 
+__version__ = '0.1.1'
+
 setup(
     author="Hrag Balian",
     author_email='hrag.balian@gmail.com',
@@ -44,6 +46,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/hbalian/terraset',
-    version='0.1.0',
+    version=__version__,
     zip_safe=False,
 )
