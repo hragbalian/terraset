@@ -45,7 +45,7 @@ setup(
     packages=find_packages(include=['terraset', 'terraset.*']),
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/hbalian/terraset',
+    url='https://github.com/hragbalian/terraset',
     version=__version__,
     zip_safe=False,
 )

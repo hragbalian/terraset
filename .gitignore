@@ -8,6 +8,7 @@ __pycache__/
 
 charts/
 dashboards/
+example.py
 
 # Distribution / packaging
 .Python
