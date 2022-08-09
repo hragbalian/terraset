@@ -18,3 +18,21 @@ class TerrasetProfileNotFoundInPath(TerrasetException):
             message='Could not find Terraset profile in specified path'):
         self.message = message
         super().__init__(self.message)
+
+
+class FoundExistingCharts(TerrasetException):
+    def __init__(
+            self,
+            count,
+            message='Found {count} existing charts in your local directory. To overwrite, set overwrite to True'):
+        self.message = message.format(count=count)
+        super().__init__(self.message)
+
+
+class FoundExistingDashboards(TerrasetException):
+    def __init__(
+            self,
+            count,
+            message='Found {count} existing dashboards in your local directory. To overwrite, set overwrite to True'):
+        self.message = message.format(count=count)
+        super().__init__(self.message)

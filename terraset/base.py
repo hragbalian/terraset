@@ -11,13 +11,15 @@ from .configs import (
     host,
     username,
     password,
+    charts_path,
+    dashboards_path,
     chart_info
 )
 
 logger = LogConfig("Terraset").logger
 
 
-class Terraset:
+class TerrasetBase:
 
     def __init__(self):
         self.conn = SupersetClient(
@@ -26,22 +28,32 @@ class Terraset:
             password=password,
             verify=True
         )
+        self.charts_dir = charts_path
+        self.dashboards_dir = dashboards_path
+
+    @staticmethod
+    def find_chart_yaml_filename(path):
+        return [x for x in os.listdir(path) if x!=".DS_Store"][0]
+
+    @staticmethod
+    def joiner(*args):
+        return "".join(args)
+
+    @staticmethod
+    def read_yaml(yml_path):
+        with open(yml_path, 'r') as stream:
+            try:
+                parsed_yaml=yaml.safe_load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+        return parsed_yaml
 
 
 
-def find_chart_yaml_filename(path):
-    return [x for x in os.listdir(path) if x!=".DS_Store"][0]
 
-def joiner(*args):
-    return "".join(args)
 
-def read_yaml(yml_path):
-    with open(yml_path, 'r') as stream:
-        try:
-            parsed_yaml=yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
-    return parsed_yaml
+
+
 
 
 class SupersetCIClient:

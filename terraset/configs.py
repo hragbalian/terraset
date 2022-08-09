@@ -5,6 +5,11 @@ from .exceptions import (
     TerrasetProfileNotFoundInPath
 )
 
+required_values = [
+    "host","username","password",
+    "charts_path", "dashboards_path"
+    ]
+
 if os.environ.get('TERRASET_PROFILE_PATH'):
 
     from dotenv import dotenv_values
@@ -16,6 +21,8 @@ if os.environ.get('TERRASET_PROFILE_PATH'):
     host=secrets.get('host')
     username=secrets.get('username')
     password=secrets.get('password')
+    charts_path=secrets.get('charts_path')
+    dashboards_path=secrets.get('dashboards_path')
 
 else:
 
@@ -28,7 +35,15 @@ else:
     if os.environ.get('TERRASET_PASSWORD'):
         password=os.environ.get('TERRASET_PASSWORD')
 
-check = {x:x in globals() for x in ["host","username","password"]}
+    if os.environ.get('TERRASET_CHARTS_PATH'):
+        charts_path=os.environ.get('TERRASET_CHARTS_PATH')
+
+    if os.environ.get('TERRASET_DASHBOARDS_PATH'):
+        dashboards_path=os.environ.get('TERRASET_DASHBOARDS_PATH')
+
+
+check = {x:x in globals() and globals()[x] is not None for x in required_values}
+
 
 if not all([x[1] for x in check.items()]):
 
