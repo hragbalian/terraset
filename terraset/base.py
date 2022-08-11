@@ -132,3 +132,17 @@ class TerrasetDashboards(TerrasetBase):
     def remote_dashboards_missing_from_local(self):
         """ Charts available in remote not stored in local """
         return list(set(self.remote_dashboards_list).difference(set(self.local_dashboards_list)))
+
+    @property
+    def remote_dashboards_list_missing_from_local(self):
+        """ Dashboards available in remote not stored in local """
+        return list(set(self.remote_dashboards_list).difference(set(self.local_dashboards_list)))
+
+    @property
+    def remote_dashboard_ids_missing_from_local(self):
+        """ Dashboards ids available in remote not stored in local """
+        return [int(x.split("_")[-1]) for x in self.remote_dashboards_list_missing_from_local]
+
+    @property
+    def remote_dashboards_missing_from_local(self):
+        return [x for x in self.remote_dashboards if x.id in self.remote_dashboard_ids_missing_from_local]

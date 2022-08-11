@@ -20,19 +20,11 @@ class TerrasetProfileNotFoundInPath(TerrasetException):
         super().__init__(self.message)
 
 
-class FoundExistingCharts(TerrasetException):
+class FoundExisting(TerrasetException):
     def __init__(
             self,
             count,
-            message='Found {count} charts stored in your local directory. To overwrite, set overwrite to True'):
-        self.message = message.format(count=count)
-        super().__init__(self.message)
-
-
-class FoundExistingDashboards(TerrasetException):
-    def __init__(
-            self,
-            count,
-            message='Found {count} dashboards stored in your local directory. To overwrite, set overwrite to True'):
-        self.message = message.format(count=count)
+            object_type,
+            message='Found {count} {object_type} stored in your local directory. To overwrite, set overwrite to True'):
+        self.message = message.format(count=count, object_type=object_type)
         super().__init__(self.message)
