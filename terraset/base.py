@@ -2,6 +2,7 @@
 import yaml
 import os, shutil
 import glob
+import re
 
 from supersetapiclient.client import SupersetClient
 
@@ -20,6 +21,7 @@ logger = LogConfig("Terraset").logger
 
 
 class TerrasetBase:
+    """ Superset connection and static methods """
 
     def __init__(self):
         self.conn = SupersetClient(
@@ -55,82 +57,78 @@ class TerrasetBase:
         return parsed_yaml
 
 
-
-
-
-
-
-
-
-class SupersetCIClient:
-    base_dir = os.getcwd()
-    charts_dir = "/charts"
-    dashboards_dir = "/dashboards"
+class TerrasetCharts(TerrasetBase):
+    """ Chart objects and list """
 
     def __init__(self):
-        self.superset_conn = SupersetClient(
-            host=host,
-            username=username,
-            password=password,
-            verify=True
-        )
+        super().__init__()
+        self._remote_charts = None
+        self._local_charts_list = []
 
     @property
-    def list_of_chart_exports(self):
-        return ["/"+x+self.charts_dir for x in os.listdir(self.base_dir+self.charts_dir) if x!=".DS_Store"]
+    def local_charts_list(self):
+        self._local_charts_list = [x for x in os.listdir(self.charts_dir) if x!=".DS_Store"]
+        return self._local_charts_list
 
     @property
-    def list_of_dashboard_exports(self):
-        return ["/"+x+self.dashboards_dir for x in os.listdir(self.base_dir+self.dashboards_dir) if x!=".DS_Store"]
+    def remote_charts(self):
+        """ These are the actual chart objects """
+        if not self._remote_charts:
+            self._remote_charts = self.conn.charts.find()
+        return self._remote_charts
 
-    def sync_charts(self):
-        """ Sync changes in local files to remote """
-        for exported_chart in self.list_of_chart_exports:
+    @remote_charts.setter
+    def remote_charts(self,value):
+        self._remote_charts = value
 
-            try:
+    @property
+    def remote_charts_list(self):
+        return [re.sub('[^A-Za-z0-9]+', '_', x.slice_name) + "_" + str(x.id) for x in self.remote_charts]
 
-                curr_path = joiner(self.base_dir,self.charts_dir,exported_chart) # Iterate over list_of_chart_exports
+    @property
+    def remote_charts_list_missing_from_local(self):
+        """ Charts available in remote not stored in local """
+        return list(set(self.remote_charts_list).difference(set(self.local_charts_list)))
 
-                chart_yaml_filename = find_chart_yaml_filename(curr_path)
+    @property
+    def remote_chart_ids_missing_from_local(self):
+        """ Charts ids available in remote not stored in local """
+        return [int(x.split("_")[-1]) for x in self.remote_charts_list_missing_from_local]
 
-                # Read yaml file from the repo
-                parsed_yaml = read_yaml(joiner(curr_path,"/",chart_yaml_filename))
+    @property
+    def remote_charts_missing_from_local(self):
+        return [x for x in self.remote_charts if x.id in self.remote_chart_ids_missing_from_local]
 
-                # Grab chart id from the yaml filename
-                chart_id = int(chart_yaml_filename.split(".")[0].split("_")[-1])
 
-                # Make API call to get latest remote chart info
-                chart = self.superset_conn.charts.get(chart_id)
+class TerrasetDashboards(TerrasetBase):
+    """ Dashboard objects and list """
 
-                for info in chart_info:
+    def __init__(self):
+        super().__init__()
+        self._remote_dashboards = None
+        self._local_dashboards_list = []
 
-                    if info in parsed_yaml.keys():
+    @property
+    def local_dashboards_list(self):
+        self._local_dashboards_list = [x for x in os.listdir(self.dashboards_dir) if x!=".DS_Store"]
+        return self._local_dashboards_list
 
-                        setattr(chart, info, parsed_yaml[info])
+    @property
+    def remote_dashboards(self):
+        """ These are the actual dashboard objects """
+        if not self._remote_dashboards:
+            self._remote_dashboards = self.conn.dashboards.find()
+        return self._remote_dashboards
 
-                        logger.info(f"{info} updated to {parsed_yaml[info]}")
+    @remote_dashboards.setter
+    def remote_dashboards(self,value):
+        self._remote_dashboards = value
 
-                # Grab dataset_id and datasource_type from the params
-                datasource_id, datasource_type = chart.params['datasource'].split("__")
+    @property
+    def remote_dashboards_list(self):
+        return [re.sub('[^A-Za-z0-9]+', '_', x.dashboard_title) + "_" + str(x.id) for x in self.remote_dashboards]
 
-                setattr(chart, "datasource_id", int(datasource_id))
-                setattr(chart, "datasource_type", datasource_type)
-
-                logger.info("Persisting changes in remote")
-
-                chart.save()
-
-                # Check to see if this chart is used by any dashboard, and if so,
-                # update the file
-                # chart_in_dashboards = [x for x in glob.iglob('dashboards/'+'**', recursive=True) if "Age_33" in x]
-
-            except Exception as e:
-
-                logger.error(str(e))
-#
-#
-# if __name__=="__main__":
-#
-#     dd = SupersetCIClient()
-#     dd.list_of_chart_exports
-#     dd.sync_charts()
+    @property
+    def remote_dashboards_missing_from_local(self):
+        """ Charts available in remote not stored in local """
+        return list(set(self.remote_dashboards_list).difference(set(self.local_dashboards_list)))
