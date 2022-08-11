@@ -1,6 +1,6 @@
 
 import yaml
-import os
+import os, shutil
 import glob
 
 from supersetapiclient.client import SupersetClient
@@ -38,6 +38,12 @@ class TerrasetBase:
     @staticmethod
     def joiner(*args):
         return "".join(args)
+
+    @staticmethod
+    def reset_directory(dir):
+        shutil.rmtree(dir)
+        os.makedirs(dir)
+        pass
 
     @staticmethod
     def read_yaml(yml_path):

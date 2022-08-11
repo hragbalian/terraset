@@ -47,7 +47,7 @@ class LogConfig:
             LOG_FORMAT=self.log_format,
             LOG_LEVEL=self.log_level,
             version=1,
-            disable_existing_loggers=False,
+            disable_existing_loggers=True,
             formatters={
                 "default": {
                     "format": self.log_format,
@@ -83,3 +83,8 @@ class LogConfig:
         """
         dictConfig(self.config)
         return logging.getLogger(self.name)
+
+
+# logger = LogConfig("terraset").logger
+#
+# logger.info("hello")
