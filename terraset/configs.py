@@ -5,6 +5,8 @@ from .exceptions import (
     TerrasetProfileNotFoundInPath
 )
 
+supported_superset_objects = ["charts", "dashboards"]
+
 required_values = [
     "host","username","password",
     "charts_path", "dashboards_path"

@@ -1,3 +1,4 @@
 git+https://github.com/hragbalian/superset-api-client@${GH_BRANCH}
 deepdiff==5.8.1
 python-dotenv==0.20.0
+pydantic==1.9.2

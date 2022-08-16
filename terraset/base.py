@@ -4,6 +4,7 @@ import os, shutil
 import re
 
 from .superset import SupersetConnectionMgmnt
+from .schemas import SupersetObject
 from .logger import LogConfig
 
 logger = LogConfig("Terraset").logger
@@ -44,7 +45,7 @@ class TerrasetObjectFactory(SupersetConnectionMgmnt):
 
     def __init__(self, object_type: str):
         super().__init__()
-        self.object_type = object_type # Add validation on this
+        self.object_type = SupersetObject(superset_object=object_type).superset_object
         self.find = self.find_methods[self.object_type] # Grab the correct method for the object type
         self._remote = None
         self._local_list = []

@@ -9,6 +9,7 @@ from .base import (
     TerrasetObjectFactory,
 )
 
+from .schemas import SupersetObject
 
 from .exceptions import (
     FoundExisting,
@@ -23,7 +24,6 @@ class TerrasetInitialize(TerrasetBase):
 
     def __init__(self):
         super().__init__()
-        
 
     @property
     def local_charts_dashboards_counts(self):
@@ -33,6 +33,8 @@ class TerrasetInitialize(TerrasetBase):
 
     def _overwrite_check(self, overwrite: bool, object_type: str):
         """ Logic to overwrite existing files or not """
+
+        SupersetObject(superset_object=object_type)
 
         if not overwrite and \
             self.local_charts_dashboards_counts[object_type]>0:
@@ -52,11 +54,13 @@ class TerrasetInitialize(TerrasetBase):
     def _get(self, object_type: str, object_list: list, overwrite: bool = False):
         """ Helper function to get specified charts
 
-        object_list (list): list of Superset charts of type supersetapiclient.charts.Chart
+        object_list (list): list of Superset charts of type supersetapiclient.charts.Chart or
+            supersetapiclient.dasbhoards.Dashboard
         overwrite (bool): whether to overwrite existing files/folders
 
         """
-        # if object_type is 'charts' validate that the entries in object_list are charts also
+
+        SupersetObject(superset_object=object_type)
 
         for i in range(len(object_list)):
 
