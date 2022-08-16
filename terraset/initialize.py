@@ -5,8 +5,9 @@ import zipfile
 import os
 
 from .base import (
-    TerrasetCharts,
-    TerrasetDashboards
+    TerrasetBase,
+    TerrasetObjectFactory,
+    # TerrasetDashboards
 )
 
 
@@ -18,17 +19,19 @@ from .logger import LogConfig
 
 logger = LogConfig("initializer").logger
 
-class TerrasetInitialize(TerrasetCharts, TerrasetDashboards):
-    """ Initializes all of the chart and dashboard files """
+class TerrasetInitialize(TerrasetBase):
+    """ Initializes all of the files """
 
     def __init__(self):
         super().__init__()
+        self.charts = TerrasetObjectFactory("charts")
+        self.dashboards = TerrasetObjectFactory("dashboards")
 
     @property
     def local_charts_dashboards_counts(self):
         return dict(
-            charts=len(self.local_charts_list),
-            dashboards=len(self.local_dashboards_list))
+            charts=len(self.charts.local_list),
+            dashboards=len(self.dashboards.local_list))
 
     def _overwrite_check(self, overwrite: bool, object_type: str):
         """ Logic to overwrite existing files or not """
@@ -37,61 +40,39 @@ class TerrasetInitialize(TerrasetCharts, TerrasetDashboards):
             self.local_charts_dashboards_counts[object_type]>0:
             raise FoundExisting(self.local_charts_dashboards_counts[object_type], object_type)
 
-        curr_dir = self.charts_dir if object_type == "charts" else self.dashboards_dir
-
         if self.local_charts_dashboards_counts[object_type]>0:
             logger.info("Overwriting existing charts with remote")
 
             ok = input(f"Are you sure you want to overwrite local {object_type}? y/n")
 
             if ok in ['y','yes']:
-                self.reset_directory(curr_dir)
+                self.reset_directory(self.dir_map[object_type])
             else:
                 logger.info("Aborted overwrite")
                 return
 
-    def _get_charts(self, charts: list, overwrite: bool = False):
+    def _get(self, object_type: str, object_list: list, overwrite: bool = False):
         """ Helper function to get specified charts
 
-        charts (list): list of Superset charts of type supersetapiclient.charts.Chart
+        object_list (list): list of Superset charts of type supersetapiclient.charts.Chart
         overwrite (bool): whether to overwrite existing files/folders
 
         """
+        # if object_type is 'charts' validate that the entries in object_list are charts also
 
-        for i in range(len(charts)):
-
-            tmp_name = str(uuid.uuid4())
-            desired_name = re.sub('[^A-Za-z0-9]+', '_', charts[i].slice_name)
-            chart_id = str(charts[i].id)
-
-            charts[i].export(self.charts_dir, tmp_name)
-
-            with zipfile.ZipFile(f'{self.charts_dir}/{tmp_name}.zip', 'r') as zip_ref:
-                zip_ref.extractall(f'{self.charts_dir}/{tmp_name}')
-
-            os.rename(f'{self.charts_dir}/{tmp_name}', f'{self.charts_dir}/{desired_name}_{chart_id}')
-            os.remove(f'{self.charts_dir}/{tmp_name}.zip')
-
-    def _get_dashboards(self, dashboards: list, overwrite: bool = False):
-        """ Helper function to get specified dashboards
-
-        dashboards (list): list of Superset charts of type supersetapiclient.dashboard.Dashboard
-        overwrite (bool): whether to overwrite existing files/folders
-
-        """
-        for i in range(len(dashboards)):
+        for i in range(len(object_list)):
 
             tmp_name = str(uuid.uuid4())
-            desired_name = re.sub('[^A-Za-z0-9]+', '_', dashboards[i].dashboard_title)
-            dashboard_id = str(dashboards[i].id)
+            desired_name = re.sub('[^A-Za-z0-9]+', '_', getattr(object_list[i],self.title_attribute[object_type]))
+            id = str(object_list[i].id)
 
-            dashboards[i].export(self.dashboards_dir, tmp_name)
+            object_list[i].export(self.dir_map[object_type], tmp_name)
 
-            with zipfile.ZipFile(f'{self.dashboards_dir}/{tmp_name}.zip', 'r') as zip_ref:
-                zip_ref.extractall(f'{self.dashboards_dir}/{tmp_name}')
+            with zipfile.ZipFile(f'{self.dir_map[object_type]}/{tmp_name}.zip', 'r') as zip_ref:
+                zip_ref.extractall(f'{self.dir_map[object_type]}/{tmp_name}')
 
-            os.rename(f'{self.dashboards_dir}/{tmp_name}', f'{self.dashboards_dir}/{desired_name}_{dashboard_id}')
-            os.remove(f'{self.dashboards_dir}/{tmp_name}.zip')
+            os.rename(f'{self.dir_map[object_type]}/{tmp_name}', f'{self.dir_map[object_type]}/{desired_name}_{id}')
+            os.remove(f'{self.dir_map[object_type]}/{tmp_name}.zip')
 
 
     def init_all(self, overwrite: bool = False):
@@ -100,7 +81,7 @@ class TerrasetInitialize(TerrasetCharts, TerrasetDashboards):
             logger.info("Initializing charts")
 
             self._overwrite_check(overwrite, "charts")
-            self._get_charts(self.remote_charts, overwrite)
+            self._get("charts",self.charts.remote, overwrite)
 
             logger.info("Successfully initialized charts")
         except Exception as e:
@@ -110,7 +91,7 @@ class TerrasetInitialize(TerrasetCharts, TerrasetDashboards):
             logger.info("Initializing dashboards")
 
             self._overwrite_check(overwrite, "dashboards")
-            self._get_dashboards(self.remote_dashboards, overwrite)
+            self._get("dashboards", self.dashboards.remote, overwrite)
 
             logger.info("Successfully initialized dashboards")
         except Exception as e:
@@ -121,7 +102,7 @@ class TerrasetInitialize(TerrasetCharts, TerrasetDashboards):
         try:
             logger.info("Initializing charts")
 
-            self._get_charts(self.remote_charts_missing_from_local)
+            self._get("charts",self.charts.remote_missing_from_local)
 
             logger.info("Successfully initialized charts")
         except Exception as e:
@@ -130,7 +111,7 @@ class TerrasetInitialize(TerrasetCharts, TerrasetDashboards):
         try:
             logger.info("Initializing dashboards")
 
-            self._get_dashboards(self.remote_dashboards_missing_from_local)
+            self._get("dashboards",self.dashboards.remote_missing_from_local)
 
             logger.info("Successfully initialized dashboards")
         except Exception as e:

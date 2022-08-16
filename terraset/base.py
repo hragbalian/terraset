@@ -30,8 +30,22 @@ class TerrasetBase:
             password=password,
             verify=True
         )
-        self.charts_dir = charts_path
-        self.dashboards_dir = dashboards_path
+
+        self.dir_map = dict(
+            charts=charts_path,
+            dashboards=dashboards_path
+        )
+
+        self.title_attribute = dict(
+            charts = "slice_name",
+            dashboards = "dashboard_title"
+        )
+
+
+        self.find_methods = dict(
+            charts = self.conn.charts.find,
+            dashboards = self.conn.dashboards.find
+        )
 
     @staticmethod
     def find_chart_yaml_filename(path):
@@ -57,92 +71,49 @@ class TerrasetBase:
         return parsed_yaml
 
 
-class TerrasetCharts(TerrasetBase):
-    """ Chart objects and list """
 
-    def __init__(self):
+
+class TerrasetObjectFactory(TerrasetBase):
+    """ Factory to create any kind of object supported by Superset (Charts, Dashboards, etc.)"""
+
+    def __init__(self, object_type):
         super().__init__()
-        self._remote_charts = None
-        self._local_charts_list = []
+        self.object_type = object_type # Add validation on this
+        self.find = self.find_methods[self.object_type] # Grab the correct the method for the object type
+        self._remote = None
+        self._local_list = []
 
     @property
-    def local_charts_list(self):
-        self._local_charts_list = [x for x in os.listdir(self.charts_dir) if x!=".DS_Store"]
-        return self._local_charts_list
+    def local_list(self):
+        self._local_list = [x for x in os.listdir(self.dir_map[self.object_type])
+            if x!=".DS_Store"]
+        return self._local_list
 
     @property
-    def remote_charts(self):
-        """ These are the actual chart objects """
-        if not self._remote_charts:
-            self._remote_charts = self.conn.charts.find()
-        return self._remote_charts
+    def remote(self):
+        """ These are the actual objects """
+        if not self._remote:
+            self._remote = self.find()
+        return self._remote
 
-    @remote_charts.setter
-    def remote_charts(self,value):
-        self._remote_charts = value
-
-    @property
-    def remote_charts_list(self):
-        return [re.sub('[^A-Za-z0-9]+', '_', x.slice_name) + "_" + str(x.id) for x in self.remote_charts]
+    @remote.setter
+    def remote(self,value):
+        self._remote = value
 
     @property
-    def remote_charts_list_missing_from_local(self):
-        """ Charts available in remote not stored in local """
-        return list(set(self.remote_charts_list).difference(set(self.local_charts_list)))
+    def remote_list(self):
+        return [re.sub('[^A-Za-z0-9]+', '_', getattr(x, self.title_attribute[self.object_type])) + "_" + str(x.id) for x in self.remote]
 
     @property
-    def remote_chart_ids_missing_from_local(self):
-        """ Charts ids available in remote not stored in local """
-        return [int(x.split("_")[-1]) for x in self.remote_charts_list_missing_from_local]
+    def remote_list_missing_from_local(self):
+        """ Available in remote not stored in local """
+        return list(set(self.remote_list).difference(set(self.local_list)))
 
     @property
-    def remote_charts_missing_from_local(self):
-        return [x for x in self.remote_charts if x.id in self.remote_chart_ids_missing_from_local]
-
-
-class TerrasetDashboards(TerrasetBase):
-    """ Dashboard objects and list """
-
-    def __init__(self):
-        super().__init__()
-        self._remote_dashboards = None
-        self._local_dashboards_list = []
+    def remote_ids_missing_from_local(self):
+        """ Ids available in remote not stored in local """
+        return [int(x.split("_")[-1]) for x in self.remote_list_missing_from_local]
 
     @property
-    def local_dashboards_list(self):
-        self._local_dashboards_list = [x for x in os.listdir(self.dashboards_dir) if x!=".DS_Store"]
-        return self._local_dashboards_list
-
-    @property
-    def remote_dashboards(self):
-        """ These are the actual dashboard objects """
-        if not self._remote_dashboards:
-            self._remote_dashboards = self.conn.dashboards.find()
-        return self._remote_dashboards
-
-    @remote_dashboards.setter
-    def remote_dashboards(self,value):
-        self._remote_dashboards = value
-
-    @property
-    def remote_dashboards_list(self):
-        return [re.sub('[^A-Za-z0-9]+', '_', x.dashboard_title) + "_" + str(x.id) for x in self.remote_dashboards]
-
-    @property
-    def remote_dashboards_missing_from_local(self):
-        """ Charts available in remote not stored in local """
-        return list(set(self.remote_dashboards_list).difference(set(self.local_dashboards_list)))
-
-    @property
-    def remote_dashboards_list_missing_from_local(self):
-        """ Dashboards available in remote not stored in local """
-        return list(set(self.remote_dashboards_list).difference(set(self.local_dashboards_list)))
-
-    @property
-    def remote_dashboard_ids_missing_from_local(self):
-        """ Dashboards ids available in remote not stored in local """
-        return [int(x.split("_")[-1]) for x in self.remote_dashboards_list_missing_from_local]
-
-    @property
-    def remote_dashboards_missing_from_local(self):
-        return [x for x in self.remote_dashboards if x.id in self.remote_dashboard_ids_missing_from_local]
+    def remote_missing_from_local(self):
+        return [x for x in self.remote if x.id in self.remote_ids_missing_from_local]
