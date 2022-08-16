@@ -7,7 +7,6 @@ import os
 from .base import (
     TerrasetBase,
     TerrasetObjectFactory,
-    # TerrasetDashboards
 )
 
 
@@ -24,8 +23,7 @@ class TerrasetInitialize(TerrasetBase):
 
     def __init__(self):
         super().__init__()
-        self.charts = TerrasetObjectFactory("charts")
-        self.dashboards = TerrasetObjectFactory("dashboards")
+        
 
     @property
     def local_charts_dashboards_counts(self):

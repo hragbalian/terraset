@@ -1,51 +1,19 @@
 
 import yaml
 import os, shutil
-import glob
 import re
 
-from supersetapiclient.client import SupersetClient
-
+from .superset import SupersetConnectionMgmnt
 from .logger import LogConfig
-
-from .configs import (
-    host,
-    username,
-    password,
-    charts_path,
-    dashboards_path,
-    chart_info
-)
 
 logger = LogConfig("Terraset").logger
 
-
-class TerrasetBase:
-    """ Superset connection and static methods """
+class TerrasetBase(SupersetConnectionMgmnt):
 
     def __init__(self):
-        self.conn = SupersetClient(
-            host=host,
-            username=username,
-            password=password,
-            verify=True
-        )
-
-        self.dir_map = dict(
-            charts=charts_path,
-            dashboards=dashboards_path
-        )
-
-        self.title_attribute = dict(
-            charts = "slice_name",
-            dashboards = "dashboard_title"
-        )
-
-
-        self.find_methods = dict(
-            charts = self.conn.charts.find,
-            dashboards = self.conn.dashboards.find
-        )
+        super().__init__()
+        self.charts = TerrasetObjectFactory("charts")
+        self.dashboards = TerrasetObjectFactory("dashboards")
 
     @staticmethod
     def find_chart_yaml_filename(path):
@@ -71,15 +39,13 @@ class TerrasetBase:
         return parsed_yaml
 
 
-
-
-class TerrasetObjectFactory(TerrasetBase):
+class TerrasetObjectFactory(SupersetConnectionMgmnt):
     """ Factory to create any kind of object supported by Superset (Charts, Dashboards, etc.)"""
 
-    def __init__(self, object_type):
+    def __init__(self, object_type: str):
         super().__init__()
         self.object_type = object_type # Add validation on this
-        self.find = self.find_methods[self.object_type] # Grab the correct the method for the object type
+        self.find = self.find_methods[self.object_type] # Grab the correct method for the object type
         self._remote = None
         self._local_list = []
 
