@@ -4,13 +4,8 @@ import uuid
 import zipfile
 import os
 
-from .base import (
-    TerrasetBase,
-    TerrasetObjectFactory,
-)
-
+from .base import TerrasetBase
 from .schemas import SupersetObject
-
 from .exceptions import (
     FoundExisting,
 )

@@ -7,6 +7,13 @@ from .exceptions import (
 
 supported_superset_objects = ["charts", "dashboards"]
 
+# These are the entries in the charts YAML files that can be updated
+updateable_info = dict(
+    charts = ['slice_name','params', 'viz_type'], # Description is missing from export
+    dashboards = ['dashboard_title', 'slug'] # There are inconsistencies in what the export produces vs. the read that need to get resolved
+)
+
+
 required_values = [
     "host","username","password",
     "charts_path", "dashboards_path"
@@ -50,6 +57,3 @@ check = {x:x in globals() and globals()[x] is not None for x in required_values}
 if not all([x[1] for x in check.items()]):
 
     raise SupersetProfileIssue(check)
-
-
-chart_info = ['slice_name','params', 'viz_type','description']

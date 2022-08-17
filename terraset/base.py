@@ -17,10 +17,6 @@ class TerrasetBase(SupersetConnectionMgmnt):
         self.dashboards = TerrasetObjectFactory("dashboards")
 
     @staticmethod
-    def find_chart_yaml_filename(path):
-        return [x for x in os.listdir(path) if x!=".DS_Store"][0]
-
-    @staticmethod
     def joiner(*args):
         return "".join(args)
 
@@ -50,6 +46,10 @@ class TerrasetObjectFactory(SupersetConnectionMgmnt):
         self._remote = None
         self._local_list = []
 
+    @staticmethod
+    def find_chart_yaml_filename(path) -> str:
+        return [x for x in os.listdir(path) if x!=".DS_Store"][0]
+
     @property
     def local_list(self):
         self._local_list = [x for x in os.listdir(self.dir_map[self.object_type])
@@ -68,19 +68,29 @@ class TerrasetObjectFactory(SupersetConnectionMgmnt):
         self._remote = value
 
     @property
-    def remote_list(self):
+    def remote_list(self) -> list:
         return [re.sub('[^A-Za-z0-9]+', '_', getattr(x, self.title_attribute[self.object_type])) + "_" + str(x.id) for x in self.remote]
 
     @property
-    def remote_list_missing_from_local(self):
+    def remote_list_missing_from_local(self) -> list:
         """ Available in remote not stored in local """
         return list(set(self.remote_list).difference(set(self.local_list)))
 
     @property
-    def remote_ids_missing_from_local(self):
+    def remote_ids_missing_from_local(self) -> list:
         """ Ids available in remote not stored in local """
         return [int(x.split("_")[-1]) for x in self.remote_list_missing_from_local]
 
     @property
-    def remote_missing_from_local(self):
+    def remote_missing_from_local(self) -> list:
         return [x for x in self.remote if x.id in self.remote_ids_missing_from_local]
+
+    @property
+    def local_yaml_filepaths(self) -> dict:
+        """ Key/value pairs of local object and filepath to object specs """
+        store = dict()
+        for x in self.local_list:
+            path_to_yaml = f"{self.dir_map[self.object_type]}/{x}/{self.object_type}"
+            curr_yaml = self.find_chart_yaml_filename(path_to_yaml)
+            store[x] = f"{path_to_yaml}/{curr_yaml}"
+        return store
