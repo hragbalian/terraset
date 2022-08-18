@@ -42,11 +42,10 @@ class TerrasetOperation(TerrasetBase):
                 item_id = int(item.split("_")[-1])
 
                 local_settings = self.read_yaml(getattr(self, object_type).local_yaml_filepaths[item])
+                remote_settings = [x for x in getattr(self, object_type).remote if x.id == item_id][0].__dict__
 
                 # if "description" not in local_settings.keys():
                 #     local_settings["description"] = ""
-
-                remote_settings = [x for x in getattr(self, object_type).remote if x.id == item_id][0].__dict__
 
                 # Filter the object to specs that can be updated via the API
                 local_settings = {x : local_settings[x] for x in updateable_info[object_type]}

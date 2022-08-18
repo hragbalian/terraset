@@ -1,11 +1,11 @@
 import os
 import re
 
-from .initialize import TerrasetInitialize
+from .fetch import TerrasetFetch
 from .operation import TerrasetOperation
 
 class Terraset(
-    TerrasetInitialize,
+    TerrasetFetch,
     TerrasetOperation):
 
     def refresh_from_remote(self):

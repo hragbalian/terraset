@@ -1,6 +1,8 @@
 Terraset
 ========
 
+This is a work in progress.
+
 Terraset will help you manage your Superset resources (e.g. charts and dashboards) through code.
 It's API is inspired by Terraform.
 

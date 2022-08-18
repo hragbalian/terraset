@@ -14,8 +14,8 @@ from .logger import LogConfig
 
 logger = LogConfig("initializer").logger
 
-class TerrasetInitialize(TerrasetBase):
-    """ Initializes all of the files """
+class TerrasetFetch(TerrasetBase):
+    """ Fetches resource (e.g. chart, dashboard) settings files """
 
     def __init__(self):
         super().__init__()
@@ -72,44 +72,44 @@ class TerrasetInitialize(TerrasetBase):
             os.remove(f'{self.dir_map[object_type]}/{tmp_name}.zip')
 
 
-    def init_all(self, overwrite: bool = False):
+    def fetch_all(self, overwrite: bool = False):
         """ Fetch all charts and dashboards """
         try:
-            logger.info("Initializing charts")
+            logger.info("Fetching charts")
 
             self._overwrite_check(overwrite, "charts")
             self._get("charts",self.charts.remote, overwrite)
 
-            logger.info("Successfully initialized charts")
+            logger.info("Successfully fetched charts")
         except Exception as e:
-            logger.error(f"Could not initialize charts: {e}")
+            logger.error(f"Could not fetched charts: {e}")
 
         try:
-            logger.info("Initializing dashboards")
+            logger.info("Fetching dashboards")
 
             self._overwrite_check(overwrite, "dashboards")
             self._get("dashboards", self.dashboards.remote, overwrite)
 
-            logger.info("Successfully initialized dashboards")
+            logger.info("Successfully fetched dashboards")
         except Exception as e:
-            logger.error(f"Could not initialize dashboards: {e}")
+            logger.error(f"Could not fetched dashboards: {e}")
 
-    def init_diff(self):
+    def fetch_diff(self):
         """ Fetch charts and dashboards that are in remote but not local """
         try:
-            logger.info("Initializing charts")
+            logger.info("Fetching charts")
 
             self._get("charts",self.charts.remote_missing_from_local)
 
-            logger.info("Successfully initialized charts")
+            logger.info("Successfully fetched charts")
         except Exception as e:
-            logger.error(f"Could not initialize charts: {e}")
+            logger.error(f"Could not fetched charts: {e}")
 
         try:
-            logger.info("Initializing dashboards")
+            logger.info("Fetching dashboards")
 
             self._get("dashboards",self.dashboards.remote_missing_from_local)
 
-            logger.info("Successfully initialized dashboards")
+            logger.info("Successfully fetched dashboards")
         except Exception as e:
-            logger.error(f"Could not initialize dashboards: {e}")
+            logger.error(f"Could not fetched dashboards: {e}")
