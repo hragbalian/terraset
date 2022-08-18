@@ -1,18 +1,16 @@
 Terraset
 ========
 
-
+Terraset will help you manage your Superset resources (e.g. charts and dashboards) through code.
+It's API is inspired by Terraform.
 
 
 Usage
 --------
 
-Terraset will manage your superset charts and dashboard (future: other Superset
-resources) through code.  In it's usage, it is inspired by Terraform.
-
-Terraset looks within specified folders for chart and dashboard information, appropriately
+Terraset looks within specified folders for chart and dashboard information,
 named `charts` and `dashboards`.  You can put these folders anywhere (e.g. a /tmp/charts, /tmp/dashboards )
-but typically you will want to use terraset as part of a CI deployment so these folders
+but typically you will want to use Terraset as part of a CI deployment so these folders
 will be in a repository.
 
 Configuration

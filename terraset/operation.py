@@ -14,7 +14,7 @@ from .configs import (
     )
 from .logger import LogConfig
 
-logger = LogConfig("planner").logger
+logger = LogConfig("operations").logger
 
 
 def pretty_print_dict(d, indent=0):
@@ -26,6 +26,7 @@ def pretty_print_dict(d, indent=0):
          print('\t' * (indent+1) + str(value))
 
 class TerrasetOperation(TerrasetBase):
+    """ Plan and Apply """
 
     def plan(self):
         """ Evaluate the differences between local and remote """
