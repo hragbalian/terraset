@@ -14,7 +14,7 @@ requirements = ['Click>=7.0', ]
 
 test_requirements = ['pytest>=3', ]
 
-__version__ = '0.1.15'
+__version__ = '0.1.16'
 
 setup(
     author="Hrag Balian",
