@@ -13,6 +13,26 @@ updateable_info = dict(
     dashboards = ['dashboard_title', 'slug'] # There are inconsistencies in what the export produces vs. the read that need to get resolved
 )
 
+# Kind of hacky but due to inconsistencies in API find vs export -
+# key is value in find, value is value in export
+find_to_export_map = dict(
+
+    charts = dict(
+        slice_name = 'slice_name',
+        params = 'params',
+        viz_type = 'viz_type',
+        description = None
+        ),
+
+    dashboards = dict(
+        dashboard_title = 'dashboard_title',
+        slug = 'slug',
+        json_metadata = 'metadata',
+        position_json = 'position'
+    )
+
+)
+
 
 required_values = [
     "host","username","password",
