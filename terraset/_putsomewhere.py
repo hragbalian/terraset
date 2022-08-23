@@ -23,6 +23,7 @@ class SupersetCIClient:
 
     def sync_charts(self):
         """ Sync changes in local files to remote """
+
         for exported_chart in self.list_of_chart_exports:
 
             try:
@@ -65,8 +66,8 @@ class SupersetCIClient:
             except Exception as e:
 
                 logger.error(str(e))
-#
-#
+
+
 # if __name__=="__main__":
 #
 #     dd = SupersetCIClient()

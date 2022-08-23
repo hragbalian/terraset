@@ -61,9 +61,9 @@ class LogConfig:
                     # "stream": "ext://sys.stderr",
                 },
             },
-            # loggers={
-            #     self.name: {"handlers": ["default"], "level": self.log_level},
-            # }
+            loggers={
+                self.name: {"handlers": ["default"], "level": self.log_level},
+            }
         )
 
     @property

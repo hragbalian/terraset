@@ -93,6 +93,21 @@ class TerrasetObjectFactory(SupersetConnectionMgmnt):
         return [x for x in self.remote if x.id in self.remote_ids_missing_from_local]
 
     @property
+    def local_list_missing_from_remote(self) -> list:
+        """ Available in local but not stored in remote """
+        return list(set(self.local_list).difference(set(self.remote_list)))
+
+    @property
+    def local_ids_missing_from_remote(self) -> list:
+        """ Ids available in local not stored in remote """
+        return [int(x.split("_")[-1]) for x in self.local_list_missing_from_remote]
+
+    @property
+    def overlap_local_and_remote(self) -> list:
+        """ Available in both remote and local """
+        return list(set(self.local_list).intersection(set(self.remote_list)))
+
+    @property
     def local_yaml_filepaths(self) -> dict:
         """ Key/value pairs of local object and filepath to object specs """
         store = dict()

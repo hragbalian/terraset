@@ -25,7 +25,7 @@ def pretty_print_dict(d, indent=0):
       else:
          print('\t' * (indent+1) + str(value))
 
-
+actions = ['add', 'change', 'delete']
 
 class TerrasetOperation(TerrasetBase):
     """ Plan and Apply """
@@ -57,18 +57,26 @@ class TerrasetOperation(TerrasetBase):
 
         Bases(base=base)
 
-        store = dict()
-        store['base'] = base
+        store = dict(
+            base = base,
+            **{x: {} for x in actions})
 
         self.refresh_from_remote()
 
         for object_type in supported_superset_objects:
 
-            store[object_type] = dict()
+            # Look for additions
+            if base == "local-to-remote":
+                store['add'][object_type] = getattr(self, object_type).local_list_missing_from_remote
+            elif base == "remote-to-local":
+                store['add'][object_type] = getattr(self, object_type).remote_list_missing_from_local
+
+            # Look for changes
+            store['change'][object_type] = dict()
 
             find_entries = find_to_export_map[object_type]
 
-            for item in getattr(self, object_type).local_list:
+            for item in getattr(self, object_type).overlap_local_and_remote:
 
                 item_id = int(item.split("_")[-1])
 
@@ -76,7 +84,7 @@ class TerrasetOperation(TerrasetBase):
                 local_settings = self.read_yaml(getattr(self, object_type).local_yaml_filepaths[item])
 
                 if object_type == "charts":
-
+                    # This is a patch until there is a fix in the API for the 'description' entry
                     if "description" not in local_settings.keys():
                         local_settings["description"] = remote_settings['description']
                         self.write_yaml(getattr(self, object_type).local_yaml_filepaths[item], local_settings)
@@ -96,7 +104,9 @@ class TerrasetOperation(TerrasetBase):
                     curr_diff = DeepDiff(local_settings, remote_settings)
 
                 if len(curr_diff)>0:
-                    store[object_type][item] = curr_diff
+                    store['change'][object_type][item] = curr_diff
+
+            # Look for deletions
 
         self.latest_plan = store
 
@@ -109,7 +119,14 @@ class TerrasetOperation(TerrasetBase):
             of desired (new) settings. Defaults to local.
 
         """
-
-        Bases(base=base)
-
         pass
+        # Bases(base=base)
+        #
+        # self.plan(base)
+        #
+        #
+        # if base == "local-to-remote":
+        #
+        #     for object_type in supported_superset_objects:
+        #
+        #         for resource in self.latest_plan[object_type]:
