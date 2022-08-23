@@ -35,6 +35,13 @@ class TerrasetBase(SupersetConnectionMgmnt):
                 print(exc)
         return parsed_yaml
 
+    @staticmethod
+    def write_yaml(yml_path, object):
+        with open(yml_path, 'w') as stream:
+            try:
+                yaml.dump(object, stream)
+            except yaml.YAMLError as exc:
+                print(exc)
 
 class TerrasetObjectFactory(SupersetConnectionMgmnt):
     """ Factory to create any kind of object supported by Superset (Charts, Dashboards, etc.)"""

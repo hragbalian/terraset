@@ -8,10 +8,12 @@ from .exceptions import (
 supported_superset_objects = ["charts", "dashboards"]
 
 # These are the entries in the charts YAML files that can be updated
-updateable_info = dict(
-    charts = ['slice_name','params', 'viz_type'], # Description is missing from export
-    dashboards = ['dashboard_title', 'slug'] # There are inconsistencies in what the export produces vs. the read that need to get resolved
-)
+# updateable_info = dict(
+#     charts = ['slice_name','params', 'viz_type'], # Description is missing from export
+#     dashboards = ['dashboard_title', 'slug'] # There are inconsistencies in what the export produces vs. the read that need to get resolved
+# )
+
+bases = ['local-to-remote', 'remote-to-local']
 
 # Kind of hacky but due to inconsistencies in API find vs export -
 # key is value in find, value is value in export
@@ -21,7 +23,7 @@ find_to_export_map = dict(
         slice_name = 'slice_name',
         params = 'params',
         viz_type = 'viz_type',
-        description = None
+        description = 'description'
         ),
 
     dashboards = dict(
