@@ -45,8 +45,8 @@ class TerrasetOperation(TerrasetBase):
 
     def refresh_from_remote(self):
         """ Refresh the chart and dashboard objects from remote """
-        self.charts.remote = self.conn.charts.find()
-        self.dashboards.remote = self.conn.dashboards.find()
+        self.charts.remote = self.find_charts()
+        self.dashboards.remote = self.find_dashboards()
 
     def plan(self, base: str = "local-to-remote"):
         """ Evaluate the differences between local and remote
@@ -107,6 +107,10 @@ class TerrasetOperation(TerrasetBase):
                     store['change'][object_type][item] = curr_diff
 
             # Look for deletions
+            if base == "local-to-remote":
+                store['delete'][object_type] = getattr(self, object_type).remote_list_missing_from_local
+            elif base == "remote-to-local":
+                store['delete'][object_type] = getattr(self, object_type).local_list_missing_from_remote
 
         self.latest_plan = store
 

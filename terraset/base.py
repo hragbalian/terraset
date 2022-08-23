@@ -9,6 +9,7 @@ from .logger import LogConfig
 
 logger = LogConfig("Terraset").logger
 
+
 class TerrasetBase(SupersetConnectionMgmnt):
 
     def __init__(self):
