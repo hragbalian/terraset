@@ -46,12 +46,11 @@ class TerrasetFetch(TerrasetBase):
                 logger.info("Aborted overwrite")
                 return
 
-    def _get(self, object_type: str, object_list: list, overwrite: bool = False):
+    def _get(self, object_type: str, object_list: list):
         """ Helper function to get specified charts
 
         object_list (list): list of Superset charts of type supersetapiclient.charts.Chart or
             supersetapiclient.dasbhoards.Dashboard
-        overwrite (bool): whether to overwrite existing files/folders
 
         """
 
@@ -78,7 +77,7 @@ class TerrasetFetch(TerrasetBase):
             logger.info("Fetching charts")
 
             self._overwrite_check(overwrite, "charts")
-            self._get("charts",self.charts.remote, overwrite)
+            self._get("charts",self.charts.remote)
 
             logger.info("Successfully fetched charts")
         except Exception as e:
@@ -88,7 +87,7 @@ class TerrasetFetch(TerrasetBase):
             logger.info("Fetching dashboards")
 
             self._overwrite_check(overwrite, "dashboards")
-            self._get("dashboards", self.dashboards.remote, overwrite)
+            self._get("dashboards", self.dashboards.remote)
 
             logger.info("Successfully fetched dashboards")
         except Exception as e:

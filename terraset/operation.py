@@ -3,8 +3,14 @@ import re
 import uuid
 import zipfile
 import os
+import json
+import random
+
 
 from deepdiff import DeepDiff
+
+from supersetapiclient.charts import Chart
+from supersetapiclient.dashboards import Dashboard
 
 from .base import TerrasetBase
 from .schemas import Bases
@@ -116,6 +122,45 @@ class TerrasetOperation(TerrasetBase):
 
         pretty_print_dict(store)
 
+    def _add_to_remote(self, object_type: str, item: str):
+        """ Add a resource from yaml file to remote
+
+        item (str): the name of the resource e.g. Age_33, where the first prefix is the name and
+            the suffix is the id. Items are unique.
+        """
+
+        ymlsettings = self.read_yaml(getattr(self, object_type).local_yaml_filepaths[item])
+        # TODO: Validate the yaml settings
+        # TODO: Validate the item name relative to other resources.  The remote infrastructure controls the actual
+        # ids so setting an id here will get overwritten.
+        datasource_id, datasource_type = ymlsettings['params']['datasource'].split("__")
+
+        if object_type == "charts":
+
+            object = Chart(
+                id=random.randint(1,10), # Chart object needs id, but the actual id is set on Superset's side by the database, so just setting random id here
+                slice_name=ymlsettings['slice_name'],
+                description=ymlsettings['description'],
+                params=json.dumps(ymlsettings['params']),
+                datasource_id=datasource_id,
+                datasource_type=datasource_type,
+                viz_type=ymlsettings['viz_type'])
+
+            new_id = self.conn.charts.add(object)
+
+            logger.info(f"Item {item} added to remote")
+
+            # Replace the settings file with a full export from superset since there could be inconsistencies with the ids
+            
+
+        elif object_type == "dashboards":
+            pass
+
+
+    def _delete_from_remote(self, object_type: str, id: int):
+        getattr(getattr(self, "conn"), object_type).delete(id)
+
+
     def apply(self, base: str = "local-to-remote"):
         """ Apply desired settings
 
@@ -123,14 +168,27 @@ class TerrasetOperation(TerrasetBase):
             of desired (new) settings. Defaults to local.
 
         """
-        pass
-        # Bases(base=base)
-        #
-        # self.plan(base)
-        #
-        #
-        # if base == "local-to-remote":
-        #
-        #     for object_type in supported_superset_objects:
-        #
-        #         for resource in self.latest_plan[object_type]:
+
+        Bases(base=base)
+
+        self.plan(base) # Trigger latest plan
+
+        current_plan = self.latest_plan
+
+        if base == "local-to-remote":
+
+            for action in actions:
+
+                current_plan_action = current_plan[action]
+
+                for object_type, items in current_plan_action.items():
+
+                    for item in items:
+
+                        if action =="add":
+
+                            self._add_to_remote(object_type, item)
+
+                        if action =="delete":
+
+                            self._delete_from_remote(object_type, int(item.split("_")[-1]))

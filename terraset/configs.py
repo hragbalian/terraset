@@ -23,7 +23,7 @@ find_to_export_map = dict(
         slice_name = 'slice_name',
         params = 'params',
         viz_type = 'viz_type',
-        description = 'description'
+        description = 'description',
         ),
 
     dashboards = dict(
