@@ -11,7 +11,7 @@ The API for Terraset is inspired by Terraform.
 Usage
 --------
 
-```
+```{python}
 from terraset.main import Terraset
 
 terraset = Terraset()
