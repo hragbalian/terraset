@@ -3,12 +3,25 @@ Terraset
 
 This is a work in progress.
 
-Terraset will help you manage your Superset resources (e.g. charts and dashboards) through code.
-It's API is inspired by Terraform.
+Terraset is a bi-directional source control framework for resources hosted in Superset.
+As such, it will help you manage your Superset resources (e.g. charts and dashboards) through code.
+The API for Terraset is inspired by Terraform.
 
 
 Usage
 --------
+
+```
+from terraset.main import Terraset
+
+terraset = Terraset()
+
+terraset.fetch_all()
+
+terraset.plan("local-to-remote")
+
+terraset.apply()
+```
 
 Terraset looks within specified folders for chart and dashboard information,
 named `charts` and `dashboards`.  You can put these folders anywhere (e.g. a /tmp/charts, /tmp/dashboards )
@@ -26,7 +39,7 @@ for each item: `TERRASET_HOST` for host, `TERRASET_USERNAME` for username, and
 `TERRASET_PASSWORD` for password.  If set in a terraset.profile file, the file should
 be structure as as such:
 
-```{}
+```
 host=<my-host>
 username=<my-username>
 password=<my-password>
