@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.23 (2022-08-26)
+
+
 ## v0.1.22 (2022-08-25)
 ### Fix
 * Had an extra overwrite in the _get method ([`b1fe2d4`](https://github.com/hragbalian/terraset/commit/b1fe2d48fb2f0daddad499a8e935ac1663f3b3d9))
