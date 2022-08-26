@@ -36,4 +36,5 @@ class TerrasetApply(TerrasetBase):
 
                       if action =="delete":
 
-                          getattr(self, object_name).delete(int(item.split("_")[-1]))
+                          getattr(self, object_name).delete(
+                            self.conn, int(item.split("_")[-1]))

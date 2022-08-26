@@ -4,9 +4,12 @@ import json
 
 from supersetapiclient.charts import Chart
 
-
 from ..factory import TerrasetObjectFactory
 from ..mixins import StaticMixins
+
+from ..logger import LogConfig
+
+logger = LogConfig("operations").logger
 
 class Charts(TerrasetObjectFactory, StaticMixins):
 
@@ -32,12 +35,12 @@ class Charts(TerrasetObjectFactory, StaticMixins):
         logger.info(f"Item {item_name} added to remote")
 
         # Replace the settings file with a full export from superset since there could be inconsistencies with the ids
-        self.reset_directory(f"{self.charts.dir_map}/{item_name}")
+        self.remove_directory(f"{self.dir_map[self.object_type]}/{item_name}")
         chart = self.conn.charts.find_one(id = new_id)
 
         self.process_export(chart,
             self.title_attribute[self.object_type],
-            self.charts.dir_map[self.object_type]
+            self.dir_map[self.object_type]
             )
 
     def change(self):

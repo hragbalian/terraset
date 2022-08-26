@@ -15,6 +15,11 @@ class StaticMixins:
         pass
 
     @staticmethod
+    def remove_directory(dir):
+        shutil.rmtree(dir)
+        pass
+
+    @staticmethod
     def read_yaml(yml_path):
         with open(yml_path, 'r') as stream:
             try:
