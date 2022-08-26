@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.26 (2022-08-26)
+
+
 ## v0.1.25 (2022-08-26)
 ### Fix
 * A couple of bug fixes ([`0f23c17`](https://github.com/hragbalian/terraset/commit/0f23c17392658ab83844141a7a5c29facd687f60))
