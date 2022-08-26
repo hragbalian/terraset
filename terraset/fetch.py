@@ -4,7 +4,7 @@ import uuid
 import zipfile
 import os
 
-from .base import TerrasetBase
+from .base import TerrasetBase, process_export
 from .schemas import SupersetObject
 from .exceptions import (
     FoundExisting,
@@ -14,11 +14,9 @@ from .logger import LogConfig
 
 logger = LogConfig("initializer").logger
 
+
 class TerrasetFetch(TerrasetBase):
     """ Fetches resource (e.g. chart, dashboard) settings files """
-
-    def __init__(self):
-        super().__init__()
 
     @property
     def local_charts_dashboards_counts(self):
@@ -58,17 +56,11 @@ class TerrasetFetch(TerrasetBase):
 
         for i in range(len(object_list)):
 
-            tmp_name = str(uuid.uuid4())
-            desired_name = re.sub('[^A-Za-z0-9]+', '_', getattr(object_list[i],self.title_attribute[object_type]))
-            id = str(object_list[i].id)
-
-            object_list[i].export(self.dir_map[object_type], tmp_name)
-
-            with zipfile.ZipFile(f'{self.dir_map[object_type]}/{tmp_name}.zip', 'r') as zip_ref:
-                zip_ref.extractall(f'{self.dir_map[object_type]}/{tmp_name}')
-
-            os.rename(f'{self.dir_map[object_type]}/{tmp_name}', f'{self.dir_map[object_type]}/{desired_name}_{id}')
-            os.remove(f'{self.dir_map[object_type]}/{tmp_name}.zip')
+            process_export(
+                object_list[i],
+                self.title_attribute[object_type],
+                self.dir_map[object_type]
+                )
 
 
     def fetch_all(self, overwrite: bool = False):

@@ -2,7 +2,7 @@ from pydantic import BaseModel, validator, StrictStr
 
 from .configs import (
     supported_superset_objects,
-    bases
+    directions
 )
 
 class SupersetObject(BaseModel):
@@ -15,12 +15,12 @@ class SupersetObject(BaseModel):
                 "Valid values are '" + "', '".join(supported_superset_objects) + "'")
         return v
 
-class Bases(BaseModel):
-    base: StrictStr
+class Directions(BaseModel):
+    direction: StrictStr
 
-    @validator('base')
-    def base_validation(cls, v):
-        if len(set([v]).difference(set(bases))) > 0:
+    @validator('direction')
+    def direction_validation(cls, v):
+        if len(set([v]).difference(set(directions))) > 0:
             raise ValueError(
-                "Valid values are '" + "', '".join(bases) + "'")
+                "Valid values are '" + "', '".join(directions) + "'")
         return v

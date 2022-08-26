@@ -1,21 +1,39 @@
-
 import yaml
-import os, shutil
+import os
 import re
+import zipfile
+import uuid
+import shutil
 
 from .superset import SupersetConnectionMgmnt
-from .schemas import SupersetObject
-from .logger import LogConfig
 
-logger = LogConfig("Terraset").logger
+from .charts import Charts
+from .dashboards import Dashboards
+
+
+def process_export(superset_object,
+    superset_object_name_entry: str, directory: str):
+    """ A helper function to transform the exported files into a common format """ 
+
+    tmp_name = str(uuid.uuid4())
+    desired_name = re.sub('[^A-Za-z0-9]+', '_', getattr(superset_object, superset_object_name_entry))
+    id = str(superset_object.id)
+
+    superset_object.export(directory, tmp_name)
+
+    with zipfile.ZipFile(f'{directory}/{tmp_name}.zip', 'r') as zip_ref:
+        zip_ref.extractall(f'{directory}/{tmp_name}')
+
+    os.rename(f'{directory}/{tmp_name}', f'{directory}/{desired_name}_{id}')
+    os.remove(f'{directory}/{tmp_name}.zip')
 
 
 class TerrasetBase(SupersetConnectionMgmnt):
 
     def __init__(self):
         super().__init__()
-        self.charts = TerrasetObjectFactory("charts")
-        self.dashboards = TerrasetObjectFactory("dashboards")
+        self.charts = Charts()
+        self.dashboards = Dashboards()
 
     @staticmethod
     def joiner(*args):
@@ -43,77 +61,3 @@ class TerrasetBase(SupersetConnectionMgmnt):
                 yaml.dump(object, stream)
             except yaml.YAMLError as exc:
                 print(exc)
-
-class TerrasetObjectFactory(SupersetConnectionMgmnt):
-    """ Factory to create any kind of object supported by Superset (Charts, Dashboards, etc.)"""
-
-    def __init__(self, object_type: str):
-        super().__init__()
-        self.object_type = SupersetObject(superset_object=object_type).superset_object
-        self.find = self.find_methods[self.object_type] # Grab the correct method for the object type
-        self._remote = None
-        self._local_list = []
-
-    @staticmethod
-    def find_chart_yaml_filename(path) -> str:
-        return [x for x in os.listdir(path) if x!=".DS_Store"][0]
-
-    @property
-    def local_list(self):
-        self._local_list = [x for x in os.listdir(self.dir_map[self.object_type])
-            if x!=".DS_Store"]
-        return self._local_list
-
-    @property
-    def remote(self):
-        """ These are the actual objects """
-        if not self._remote:
-            self._remote = self.find()
-        return self._remote
-
-    @remote.setter
-    def remote(self,value):
-        self._remote = value
-
-    @property
-    def remote_list(self) -> list:
-        return [re.sub('[^A-Za-z0-9]+', '_', getattr(x, self.title_attribute[self.object_type])) + "_" + str(x.id) for x in self.remote]
-
-    @property
-    def remote_list_missing_from_local(self) -> list:
-        """ Available in remote not stored in local """
-        return list(set(self.remote_list).difference(set(self.local_list)))
-
-    @property
-    def remote_ids_missing_from_local(self) -> list:
-        """ Ids available in remote not stored in local """
-        return [int(x.split("_")[-1]) for x in self.remote_list_missing_from_local]
-
-    @property
-    def remote_missing_from_local(self) -> list:
-        return [x for x in self.remote if x.id in self.remote_ids_missing_from_local]
-
-    @property
-    def local_list_missing_from_remote(self) -> list:
-        """ Available in local but not stored in remote """
-        return list(set(self.local_list).difference(set(self.remote_list)))
-
-    @property
-    def local_ids_missing_from_remote(self) -> list:
-        """ Ids available in local not stored in remote """
-        return [int(x.split("_")[-1]) for x in self.local_list_missing_from_remote]
-
-    @property
-    def overlap_local_and_remote(self) -> list:
-        """ Available in both remote and local """
-        return list(set(self.local_list).intersection(set(self.remote_list)))
-
-    @property
-    def local_yaml_filepaths(self) -> dict:
-        """ Key/value pairs of local object and filepath to object specs """
-        store = dict()
-        for x in self.local_list:
-            path_to_yaml = f"{self.dir_map[self.object_type]}/{x}/{self.object_type}"
-            curr_yaml = self.find_chart_yaml_filename(path_to_yaml)
-            store[x] = f"{path_to_yaml}/{curr_yaml}"
-        return store

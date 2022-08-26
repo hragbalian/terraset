@@ -2,8 +2,8 @@ import os
 import re
 
 from .fetch import TerrasetFetch
-from .operation import TerrasetOperation
+from .plan import TerrasetPlan
 
 class Terraset(
     TerrasetFetch,
-    TerrasetOperation): pass
+    TerrasetPlan): pass

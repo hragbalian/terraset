@@ -3,20 +3,16 @@ import re
 import uuid
 import zipfile
 import os
-import json
-import random
-
 
 from deepdiff import DeepDiff
 
-from supersetapiclient.charts import Chart
-from supersetapiclient.dashboards import Dashboard
 
 from .base import TerrasetBase
-from .schemas import Bases
+from .schemas import Directions
 from .configs import (
     supported_superset_objects,
-    find_to_export_map
+    find_to_export_map,
+    actions
     )
 from .logger import LogConfig
 
@@ -31,9 +27,9 @@ def pretty_print_dict(d, indent=0):
       else:
          print('\t' * (indent+1) + str(value))
 
-actions = ['add', 'change', 'delete']
 
-class TerrasetOperation(TerrasetBase):
+
+class TerrasetPlan(TerrasetBase):
     """ Plan and Apply """
 
     def __init__(self):
@@ -54,17 +50,17 @@ class TerrasetOperation(TerrasetBase):
         self.charts.remote = self.find_charts()
         self.dashboards.remote = self.find_dashboards()
 
-    def plan(self, base: str = "local-to-remote"):
+    def plan(self, direction: str = "local-to-remote"):
         """ Evaluate the differences between local and remote
 
-        base (str): whether to set local settings or remote settings as the base
+        direction (str): whether to set local settings or remote settings as the direction
             of desired (new) settings. Defaults to local-to-remote.
         """
 
-        Bases(base=base)
+        Directions(direction=direction)
 
         store = dict(
-            base = base,
+            direction = direction,
             **{x: {} for x in actions})
 
         self.refresh_from_remote()
@@ -72,9 +68,9 @@ class TerrasetOperation(TerrasetBase):
         for object_type in supported_superset_objects:
 
             # Look for additions
-            if base == "local-to-remote":
+            if direction == "local-to-remote":
                 store['add'][object_type] = getattr(self, object_type).local_list_missing_from_remote
-            elif base == "remote-to-local":
+            elif direction == "remote-to-local":
                 store['add'][object_type] = getattr(self, object_type).remote_list_missing_from_local
 
             # Look for changes
@@ -90,7 +86,7 @@ class TerrasetOperation(TerrasetBase):
                 local_settings = self.read_yaml(getattr(self, object_type).local_yaml_filepaths[item])
 
                 if object_type == "charts":
-                    # This is a patch until there is a fix in the API for the 'description' entry
+                    # This if statement is a patch until there is a fix in the API for the 'description' entry for charts
                     if "description" not in local_settings.keys():
                         local_settings["description"] = remote_settings['description']
                         self.write_yaml(getattr(self, object_type).local_yaml_filepaths[item], local_settings)
@@ -104,91 +100,20 @@ class TerrasetOperation(TerrasetBase):
                 remote_settings = {x : remote_settings[x] for x in find_entries}
                 local_settings = {x : local_settings[x] for x in find_entries}
 
-                if base == "local-to-remote":
+                if direction == "local-to-remote":
                     curr_diff = DeepDiff(remote_settings, local_settings)
-                elif base == "remote-to-local":
+                elif direction == "remote-to-local":
                     curr_diff = DeepDiff(local_settings, remote_settings)
 
                 if len(curr_diff)>0:
                     store['change'][object_type][item] = curr_diff
 
             # Look for deletions
-            if base == "local-to-remote":
+            if direction == "local-to-remote":
                 store['delete'][object_type] = getattr(self, object_type).remote_list_missing_from_local
-            elif base == "remote-to-local":
+            elif direction == "remote-to-local":
                 store['delete'][object_type] = getattr(self, object_type).local_list_missing_from_remote
 
         self.latest_plan = store
 
         pretty_print_dict(store)
-
-    def _add_to_remote(self, object_type: str, item: str):
-        """ Add a resource from yaml file to remote
-
-        item (str): the name of the resource e.g. Age_33, where the first prefix is the name and
-            the suffix is the id. Items are unique.
-        """
-
-        ymlsettings = self.read_yaml(getattr(self, object_type).local_yaml_filepaths[item])
-        # TODO: Validate the yaml settings
-        # TODO: Validate the item name relative to other resources.  The remote infrastructure controls the actual
-        # ids so setting an id here will get overwritten.
-        datasource_id, datasource_type = ymlsettings['params']['datasource'].split("__")
-
-        if object_type == "charts":
-
-            object = Chart(
-                id=random.randint(1,10), # Chart object needs id, but the actual id is set on Superset's side by the database, so just setting random id here
-                slice_name=ymlsettings['slice_name'],
-                description=ymlsettings['description'],
-                params=json.dumps(ymlsettings['params']),
-                datasource_id=datasource_id,
-                datasource_type=datasource_type,
-                viz_type=ymlsettings['viz_type'])
-
-            new_id = self.conn.charts.add(object)
-
-            logger.info(f"Item {item} added to remote")
-
-            # Replace the settings file with a full export from superset since there could be inconsistencies with the ids
-            
-
-        elif object_type == "dashboards":
-            pass
-
-
-    def _delete_from_remote(self, object_type: str, id: int):
-        getattr(getattr(self, "conn"), object_type).delete(id)
-
-
-    def apply(self, base: str = "local-to-remote"):
-        """ Apply desired settings
-
-        base (str): whether to set local settings or remote settings as the base
-            of desired (new) settings. Defaults to local.
-
-        """
-
-        Bases(base=base)
-
-        self.plan(base) # Trigger latest plan
-
-        current_plan = self.latest_plan
-
-        if base == "local-to-remote":
-
-            for action in actions:
-
-                current_plan_action = current_plan[action]
-
-                for object_type, items in current_plan_action.items():
-
-                    for item in items:
-
-                        if action =="add":
-
-                            self._add_to_remote(object_type, item)
-
-                        if action =="delete":
-
-                            self._delete_from_remote(object_type, int(item.split("_")[-1]))

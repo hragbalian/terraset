@@ -5,7 +5,10 @@ from .exceptions import (
     TerrasetProfileNotFoundInPath
 )
 
-supported_superset_objects = ["charts", "dashboards"]
+supported_superset_objects = [
+    "charts",
+    "dashboards"
+    ]
 
 # These are the entries in the charts YAML files that can be updated
 # updateable_info = dict(
@@ -13,7 +16,9 @@ supported_superset_objects = ["charts", "dashboards"]
 #     dashboards = ['dashboard_title', 'slug'] # There are inconsistencies in what the export produces vs. the read that need to get resolved
 # )
 
-bases = ['local-to-remote', 'remote-to-local']
+directions = ['local-to-remote', 'remote-to-local']
+
+actions = ['add', 'change', 'delete']
 
 # Kind of hacky but due to inconsistencies in API find vs export -
 # key is value in find, value is value in export
