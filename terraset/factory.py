@@ -62,7 +62,7 @@ class TerrasetObjectFactory(SupersetConnectionMgmnt, ABC):
     def delete(self, superset_connection, id: int):
         logger.info(f"Deleted {self.object_type} {id}")
         getattr(getattr(self, "conn"), self.object_type).delete(id)
-        
+
     @staticmethod
     def find_chart_yaml_filename(path) -> str:
         return [x for x in os.listdir(path) if x!=".DS_Store"][0]

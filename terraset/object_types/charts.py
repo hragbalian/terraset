@@ -1,15 +1,20 @@
 
+import random
+import json
 
-from .factory import TerrasetObjectFactory
-from .base import process_export
+from supersetapiclient.charts import Chart
 
-class Charts(TerrasetObjectFactory):
+
+from ..factory import TerrasetObjectFactory
+from ..mixins import StaticMixins
+
+class Charts(TerrasetObjectFactory, StaticMixins):
 
     object_type = "charts"
 
     def add(self, item_name: str):
 
-        ymlsettings = self.read_yaml(getattr(self, self.object_type).local_yaml_filepaths[item_name])
+        ymlsettings = self.read_yaml(self.local_yaml_filepaths[item_name])
         # TODO: Validate the yaml settings
         datasource_id, datasource_type = ymlsettings['params']['datasource'].split("__")
 
@@ -30,7 +35,7 @@ class Charts(TerrasetObjectFactory):
         self.reset_directory(f"{self.charts.dir_map}/{item_name}")
         chart = self.conn.charts.find_one(id = new_id)
 
-        process_export(chart,
+        self.process_export(chart,
             self.title_attribute[self.object_type],
             self.charts.dir_map[self.object_type]
             )

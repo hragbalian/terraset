@@ -1,3 +1,4 @@
+
 from supersetapiclient.client import SupersetClient
 
 from .configs import (
@@ -34,7 +35,6 @@ class SupersetConnectionMgmnt:
             charts = self.find_charts,
             dashboards = self.find_dashboards
         )
-
 
     def find_all(self, object_type: str):
 

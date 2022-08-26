@@ -4,7 +4,7 @@ import uuid
 import zipfile
 import os
 
-from .base import TerrasetBase, process_export
+from .base import TerrasetBase
 from .schemas import SupersetObject
 from .exceptions import (
     FoundExisting,
@@ -56,7 +56,7 @@ class TerrasetFetch(TerrasetBase):
 
         for i in range(len(object_list)):
 
-            process_export(
+            self.process_export(
                 object_list[i],
                 self.title_attribute[object_type],
                 self.dir_map[object_type]

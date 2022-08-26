@@ -3,7 +3,10 @@ import re
 
 from .fetch import TerrasetFetch
 from .plan import TerrasetPlan
+from .apply import TerrasetApply
 
 class Terraset(
     TerrasetFetch,
-    TerrasetPlan): pass
+    TerrasetPlan,
+    TerrasetApply
+    ): pass

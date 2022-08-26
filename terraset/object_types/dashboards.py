@@ -1,6 +1,8 @@
 
 
-from .factory import TerrasetObjectFactory
+from supersetapiclient.dashboards import Dashboard
+
+from ..factory import TerrasetObjectFactory
 
 class Dashboards(TerrasetObjectFactory):
 
