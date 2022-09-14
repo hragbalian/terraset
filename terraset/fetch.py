@@ -24,7 +24,8 @@ class TerrasetFetch(TerrasetBase):
         return dict(
             charts=len(self.charts.local_list),
             dashboards=len(self.dashboards.local_list),
-            datasets=len(self.datasets.local_list))
+            datasets=len(self.datasets.local_list),
+            databases=len(self.databases.local_list))
 
     def _overwrite_check(self, overwrite: bool, object_type: str):
         """ Logic to overwrite existing files or not """

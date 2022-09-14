@@ -1,18 +1,18 @@
 
 import os
 
-from supersetapiclient.datasets import Datasets as Dataset
+from supersetapiclient.databases import Databases as Database
 
 from ..factory import TerrasetObjectFactory
 from ..mixins import StaticMixins
 
 from ..logger import LogConfig
 
-logger = LogConfig("datasets").logger
+logger = LogConfig("databases").logger
 
-class Datasets(TerrasetObjectFactory, StaticMixins):
+class Databases(TerrasetObjectFactory, StaticMixins):
 
-    object_type = "datasets"
+    object_type = "databases"
 
     def __init__(self):
         super().__init__()

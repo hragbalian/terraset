@@ -12,11 +12,6 @@ supported_superset_objects = [
     # "databases"
     ]
 
-# These are the entries in the charts YAML files that can be updated
-# updateable_info = dict(
-#     charts = ['slice_name','params', 'viz_type'], # Description is missing from export
-#     dashboards = ['dashboard_title', 'slug'] # There are inconsistencies in what the export produces vs. the read that need to get resolved
-# )
 
 directions = [
     'local-to-remote',
@@ -43,6 +38,10 @@ find_to_export_map = dict(
         position_json = 'position'
     )
 
+    datasets = dict(
+        table_name = 'table_name',
+        #others will be supported later
+    )
 )
 
 

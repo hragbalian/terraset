@@ -24,8 +24,6 @@ class SupersetConnectionMgmnt:
         )
 
         self.dir_map = dict(
-            # charts=charts_path,
-            # dashboards=dashboards_path
             charts=f"{resources_path}/charts",
             dashboards=f"{resources_path}/dashboards",
             databases=f"{resources_path}/databases",
@@ -35,7 +33,8 @@ class SupersetConnectionMgmnt:
         self.title_attribute = dict(
             charts = "slice_name",
             dashboards = "dashboard_title",
-            datasets = "table_name"
+            datasets = "table_name",
+            databases = "database_name"
         )
 
         self.find_methods = dict()
