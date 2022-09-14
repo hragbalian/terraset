@@ -47,16 +47,16 @@ To work, Terraset must connect to a running Superset instance, running either
 locally or remotely.  To establish a connection requires a `host`, `username`,
 and `password`.  This information can be entered into a `terraset.profile` file
 within a directory set by `TERRASET_PROFILE_PATH`, or with environment variables
-for each item: `TERRASET_HOST` for host, `TERRASET_USERNAME` for username, and
-`TERRASET_PASSWORD` for password.  If set in a terraset.profile file, the file should
+for each item: `TERRASET_HOST` for host, `TERRASET_USERNAME` for username,
+`TERRASET_PASSWORD` for password, `TERRASET_RESOURCES_PATH` for the location of all Superset YML files.  
+If set in a terraset.profile file, the file should
 be structure as as such:
 
 ```
 host=<my-host>
 username=<my-username>
 password=<my-password>
-charts_path=
-dashboards_path=
+resources_path=
 ```
 
 For the most flexibility, the user connecting to Superset should

@@ -7,7 +7,9 @@ from .exceptions import (
 
 supported_superset_objects = [
     "charts",
-    "dashboards"
+    "dashboards",
+    "datasets",
+    # "databases"
     ]
 
 # These are the entries in the charts YAML files that can be updated
@@ -16,7 +18,10 @@ supported_superset_objects = [
 #     dashboards = ['dashboard_title', 'slug'] # There are inconsistencies in what the export produces vs. the read that need to get resolved
 # )
 
-directions = ['local-to-remote', 'remote-to-local']
+directions = [
+    'local-to-remote',
+    'remote-to-local'
+    ]
 
 actions = ['add', 'change', 'delete']
 
@@ -43,7 +48,7 @@ find_to_export_map = dict(
 
 required_values = [
     "host","username","password",
-    "charts_path", "dashboards_path"
+    "resources_path",
     ]
 
 if os.environ.get('TERRASET_PROFILE_PATH'):
@@ -57,8 +62,7 @@ if os.environ.get('TERRASET_PROFILE_PATH'):
     host=secrets.get('host')
     username=secrets.get('username')
     password=secrets.get('password')
-    charts_path=secrets.get('charts_path')
-    dashboards_path=secrets.get('dashboards_path')
+    resources_path=secrets.get('resources_path')
 
 else:
 
@@ -71,11 +75,8 @@ else:
     if os.environ.get('TERRASET_PASSWORD'):
         password=os.environ.get('TERRASET_PASSWORD')
 
-    if os.environ.get('TERRASET_CHARTS_PATH'):
-        charts_path=os.environ.get('TERRASET_CHARTS_PATH')
-
-    if os.environ.get('TERRASET_DASHBOARDS_PATH'):
-        dashboards_path=os.environ.get('TERRASET_DASHBOARDS_PATH')
+    if os.environ.get('TERRASET_RESOURCES_PATH'):
+        resources_path=os.environ.get('TERRASET_RESOURCES_PATH')
 
 
 check = {x:x in globals() and globals()[x] is not None for x in required_values}

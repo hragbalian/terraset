@@ -47,8 +47,9 @@ class TerrasetPlan(TerrasetBase):
 
     def refresh_from_remote(self):
         """ Refresh the chart and dashboard objects from remote """
-        self.charts.remote = self.find_charts()
-        self.dashboards.remote = self.find_dashboards()
+        for supported_object in supported_superset_objects:
+            getattr(self, supported_object).remote = getattr(self, f"find_{supported_object}")()
+
 
     def plan(self, direction: str = "local-to-remote"):
         """ Evaluate the differences between local and remote

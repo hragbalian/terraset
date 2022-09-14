@@ -58,7 +58,7 @@ class LogConfig:
                 "default": {
                     "formatter": "default",
                     "class": "logging.StreamHandler",
-                    # "stream": "ext://sys.stderr",
+                    "stream": "ext://sys.stderr",
                 },
             },
             loggers={

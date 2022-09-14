@@ -3,6 +3,8 @@ from .superset import SupersetConnectionMgmnt
 
 from .object_types.charts import Charts
 from .object_types.dashboards import Dashboards
+from .object_types.datasets import Datasets
+
 from .mixins import StaticMixins
 
 class TerrasetBase(SupersetConnectionMgmnt, StaticMixins):
@@ -11,3 +13,4 @@ class TerrasetBase(SupersetConnectionMgmnt, StaticMixins):
         super().__init__()
         self.charts = Charts()
         self.dashboards = Dashboards()
+        self.datasets = Datasets()

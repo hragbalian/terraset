@@ -5,8 +5,10 @@ from .configs import (
     host,
     username,
     password,
-    charts_path,
-    dashboards_path
+    resources_path,
+    # charts_path,
+    # dashboards_path,
+    supported_superset_objects
 )
 from .schemas import SupersetObject
 
@@ -22,19 +24,25 @@ class SupersetConnectionMgmnt:
         )
 
         self.dir_map = dict(
-            charts=charts_path,
-            dashboards=dashboards_path
+            # charts=charts_path,
+            # dashboards=dashboards_path
+            charts=f"{resources_path}/charts",
+            dashboards=f"{resources_path}/dashboards",
+            databases=f"{resources_path}/databases",
+            datasets=f"{resources_path}/datasets"
         )
 
         self.title_attribute = dict(
             charts = "slice_name",
-            dashboards = "dashboard_title"
+            dashboards = "dashboard_title",
+            datasets = "table_name"
         )
 
-        self.find_methods = dict(
-            charts = self.find_charts,
-            dashboards = self.find_dashboards
-        )
+        self.find_methods = dict()
+
+        for superset_object in supported_superset_objects:
+            self.find_methods[superset_object] = getattr(self, f"find_{superset_object}")
+
 
     def find_all(self, object_type: str):
 
@@ -62,3 +70,9 @@ class SupersetConnectionMgmnt:
 
     def find_dashboards(self):
         return self.find_all("dashboards")
+
+    def find_datasets(self):
+        return self.find_all("datasets")
+
+    def find_databases(self):
+        return self.find_all("databases")
